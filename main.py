@@ -90,7 +90,6 @@ while cap.isOpened():
 
     result = detector.detect(mp_image)
 
-
     for hand in result.hand_landmarks:
         for start, end in connections:
 
@@ -141,12 +140,12 @@ while cap.isOpened():
                 if distance > max_distance:
                     max_distance = distance
     
-            if key == ord("v"):
+            if key == ord("A"):
                 print("A key detected!")
                 if max_distance == 0:
                     print("Could not scale hand")
                 else:
-                    label = "G"
+                    label = "A"
                     row = [label]
     
                     for landmark in hand:
