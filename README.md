@@ -52,3 +52,4 @@ ASL-Sign-Language-Recognition/
 ├── asl_model.pkl
 ├── hand_landmarker.task
 └── README.md
+'''
