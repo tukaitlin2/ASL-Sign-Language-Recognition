@@ -7,17 +7,8 @@ import joblib
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-
-# -----------------------------
-# Load trained model
-# -----------------------------
-
 model = joblib.load("asl_model.pkl")
 
-
-# -----------------------------
-# Load MediaPipe
-# -----------------------------
 
 model_path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -37,17 +28,8 @@ detector = vision.HandLandmarker.create_from_options(
     options
 )
 
-
-# -----------------------------
-# Webcam
-# -----------------------------
-
 cap = cv2.VideoCapture(0)
 
-
-# -----------------------------
-# Hand connections
-# -----------------------------
 
 connections = [
     (0, 1),
@@ -79,10 +61,6 @@ connections = [
 ]
 
 
-# -----------------------------
-# Main loop
-# -----------------------------
-
 while cap.isOpened():
 
     success, frame = cap.read()
@@ -105,19 +83,11 @@ while cap.isOpened():
 
     result = detector.detect(mp_image)
 
-
-    # -----------------------------
-    # If hand detected
-    # -----------------------------
-
     if result.hand_landmarks:
 
         hand = result.hand_landmarks[0]
-
         wrist = hand[0]
 
-
-        # Find largest distance from wrist
         max_distance = 0
 
         for landmark in hand:
@@ -135,38 +105,17 @@ while cap.isOpened():
 
         if max_distance != 0:
 
-            # -----------------------------
-            # Create input for model
-            # -----------------------------
 
             row = []
 
             for landmark in hand:
+                centered_x = (landmark.x - wrist.x)
+                centered_y = (landmark.y - wrist.y)
+                centered_z = (landmark.z - wrist.z)
 
-                centered_x = (
-                    landmark.x - wrist.x
-                )
-
-                centered_y = (
-                    landmark.y - wrist.y
-                )
-
-                centered_z = (
-                    landmark.z - wrist.z
-                )
-
-
-                scaled_x = (
-                    centered_x / max_distance
-                )
-
-                scaled_y = (
-                    centered_y / max_distance
-                )
-
-                scaled_z = (
-                    centered_z / max_distance
-                )
+                scaled_x = (centered_x / max_distance)
+                scaled_y = (centered_y / max_distance)
+                scaled_z = (centered_z / max_distance)
 
 
                 row.extend([
@@ -175,17 +124,7 @@ while cap.isOpened():
                     scaled_z
                 ])
 
-
-            # -----------------------------
-            # Make prediction
-            # -----------------------------
-
             prediction = model.predict([row])[0]
-
-
-            # -----------------------------
-            # Display prediction
-            # -----------------------------
 
             cv2.putText(
                 frame,
@@ -197,28 +136,12 @@ while cap.isOpened():
                 3
             )
 
-
-        # -----------------------------
-        # Draw hand landmarks
-        # -----------------------------
-
         for start, end in connections:
 
-            x1 = int(
-                hand[start].x * frame.shape[1]
-            )
-
-            y1 = int(
-                hand[start].y * frame.shape[0]
-            )
-
-            x2 = int(
-                hand[end].x * frame.shape[1]
-            )
-
-            y2 = int(
-                hand[end].y * frame.shape[0]
-            )
+            x1 = int(hand[start].x * frame.shape[1])
+            y1 = int(hand[start].y * frame.shape[0])
+            x2 = int(hand[end].x * frame.shape[1])
+            y2 = int(hand[end].y * frame.shape[0])
 
             cv2.line(
                 frame,
@@ -230,14 +153,8 @@ while cap.isOpened():
 
 
         for landmark in hand:
-
-            x = int(
-                landmark.x * frame.shape[1]
-            )
-
-            y = int(
-                landmark.y * frame.shape[0]
-            )
+            x = int(landmark.x * frame.shape[1])
+            y = int(landmark.y * frame.shape[0])
 
             cv2.circle(
                 frame,
@@ -247,10 +164,6 @@ while cap.isOpened():
                 -1
             )
 
-
-    # -----------------------------
-    # Show webcam
-    # -----------------------------
 
     cv2.imshow(
         "ASL Recognition",
